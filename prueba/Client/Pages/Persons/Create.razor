@@ -1,0 +1,93 @@
+﻿@page "/persons/create/"
+@inject HttpClient _client
+@inject IJSRuntime js
+@inject NavigationManager _navManager
+
+
+
+<h3 class="card-title">Create New Person</h3>
+<hr />
+<br />
+
+@*<FormComponent ButtonText="Create Vehicle" OnValidSubmit="@CreatePerson" person="person" />
+*@
+<EditForm Model= "@person" OnInvalidSubmit = "CreatePerson">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    @*<div class ="form-group">
+
+        <label> Name: </label>
+        <div>
+            <InputText @bind-bind-Value="@person.Name" class="form-control" />
+            <ValidationMessage For="@(()=>person.Name)" />
+        </div>
+
+
+    </div>*@
+
+
+
+    <div class="form-group"> 
+
+
+         <label> Name: </label>
+        <div>
+            <InputText @bind-Value="@person.Name" class="form-control" />
+
+            <ValidationMessage For="@(()=>person.Name)" />
+               
+        </div>
+
+        <label>Person:</label>
+
+        <div>
+            <select @bind="person.CountryId" class="form-control">
+
+                <option value =" "> -- Select Country-- </option>
+
+                @if (countries != null)
+
+                {
+                    foreach (var country in countries)
+                    {
+                        <option value ="@country.Id"> @country.Name</option>
+                   
+                    }
+
+                }
+
+
+            </select>
+
+
+        </div>
+
+       
+    </div>
+
+    <button type="submit" class="btn btn-success btn-block">
+        Create Person
+    </button>
+
+</EditForm>
+
+@code {
+    Person person = new Person();
+    private IList<Country> countries;
+
+    protected async override Task OnInitializedAsync()
+    {
+        countries = await _client.GetFromJsonAsync<List<Country>>($"{Endpoints.CountrysEndpoint}");
+    }
+
+    private async Task CreatePerson()
+    {
+
+        await _client.PostAsJsonAsync<Person>(Endpoints.PersonsEndpoint, person);
+
+        //_client.NavigateTo("/Persons/");
+        _navManager.NavigateTo("/persons");
+
+    }
+}

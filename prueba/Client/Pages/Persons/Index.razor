@@ -1,0 +1,71 @@
+﻿@page "/persons/"
+@inject HttpClient _client
+@inject IJSRuntime js
+
+
+<h1>
+    Application Prueba
+
+</h1>
+<br />
+<a href="/persons/create" class="btn btn-secondary">
+    <span class="oi oi-plus"></span>
+    Create New Person
+</a>
+<br />
+<br />
+
+
+    <table class="table" id="personsTable">
+        <thead>
+            <tr>
+               
+                <th>Name</th>
+                <th>CountryId</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+           @foreach (var person in People)
+           {
+               <tr>
+               
+                <td>@person.Name</td>
+                <td>@person.CountryId</td>
+                <td>
+                    <a href= "/persons/edit/@person.Id" class="btn btn-primary">
+                        <span class="oi oi-pencil"> </span>
+                        
+                    </a>
+                    <button class="btn btn-danger" @onclick="(()=>Delete(person.Id))" >
+                     <span class="oi oi-delete"> </span>
+                    </button>
+
+
+                </td>
+            </tr>
+           }
+        </tbody>
+    </table>
+
+
+
+@code {
+    private List<Person> People;
+
+    protected async override Task OnInitializedAsync() {
+
+        People = await _client.GetFromJsonAsync<List<Person>>(Endpoints.PersonsEndpoint);
+
+    }
+    private async Task Delete(int personId)
+    {
+        var person = People.First(q => q.Id == personId);
+        if (await js.InvokeAsync<bool>("confirm", $"Do you want to delete{ person.Name}?"))
+        {
+            await _client.DeleteAsync($"{Endpoints.PersonsEndpoint}/ {personId}");
+        }
+    }
+
+
+}
